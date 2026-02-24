@@ -1,0 +1,13 @@
+model PageView {
+    id        String   @id @default(uuid())
+    path      String
+    referrer  String?
+    userAgent String?
+    ipHash    String?
+    country   String?
+    createdAt DateTime @default(now())
+
+    @@index([path])
+    @@index([createdAt])
+    @@map("page_views")
+}

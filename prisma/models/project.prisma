@@ -1,0 +1,18 @@
+model Project {
+    id          String   @id @default(uuid())
+    title       String
+    slug        String   @unique
+    description String
+    about       String   @db.Text
+    techStack   String[]
+    githubUrl   String?
+    previewUrl  String?
+    coverImage  String?
+    featured    Boolean  @default(false)
+    published   Boolean  @default(false)
+    sortOrder   Int      @default(0)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@map("projects")
+}
