@@ -1,11 +1,13 @@
 model ContactMessage {
-    id        String   @id @default(uuid())
+    id        String    @id @default(uuid())
     name      String
     email     String
     subject   String
-    message   String   @db.Text
-    read      Boolean  @default(false)
-    createdAt DateTime @default(now())
+    message   String    @db.Text
+    read      Boolean   @default(false)
+    repliedAt DateTime?
+    replyText String?
+    createdAt DateTime  @default(now())
 
     @@map("contact_messages")
 }

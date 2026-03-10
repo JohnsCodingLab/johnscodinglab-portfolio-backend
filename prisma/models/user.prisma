@@ -1,12 +1,13 @@
 model User {
-    id           String   @id @default(uuid())
-    email        String   @unique
-    password     String
-    name         String
-    role         String   @default("admin")
-    tokenVersion Int      @default(0)
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
+    id            String         @id @default(uuid())
+    email         String         @unique
+    password      String
+    name          String
+    role          String         @default("admin")
+    tokenVersion  Int            @default(0)
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    refreshTokens RefreshToken[]
 
     @@map("users")
 }

@@ -1,0 +1,17 @@
+model RefreshToken {
+    id           String    @id @default(uuid())
+    jti          String    @unique
+    userId       String
+    user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    tokenVersion Int       @default(0)
+    expiresAt    DateTime
+    revokedAt    DateTime?
+    createdAt    DateTime  @default(now())
+
+    ipAddress String?
+    userAgent String?
+
+    @@index([userId])
+    @@index([jti])
+    @@map("refresh_tokens")
+}
