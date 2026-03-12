@@ -14,6 +14,7 @@ import { AnalyticsService } from './analytics.service';
 import { TrackPageViewDto } from './dto/track-page-view.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Analytics')
 @Controller('analytics')
@@ -21,6 +22,7 @@ export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
   @Public()
+  @Throttle({ default: { limit: 10, ttl: 10000 } }) // 10 reqs per 10 secs (for rapid page navigating)
   @Post('track')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Track a page view (public)' })

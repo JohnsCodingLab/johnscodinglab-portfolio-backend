@@ -15,6 +15,7 @@ import { CreateContactDto } from './dto/create-contact.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ReplyContactDto } from './dto/reply-contact.dto';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('Contact')
 @Controller('contact')
@@ -22,6 +23,7 @@ export class ContactController {
   constructor(private readonly contactService: ContactService) {}
 
   @Public()
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 requests per 60 secs
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Submit a contact message (public)' })

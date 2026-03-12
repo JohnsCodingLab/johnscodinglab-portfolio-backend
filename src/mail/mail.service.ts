@@ -15,12 +15,14 @@ export class MailService implements OnModuleInit {
 
     this.transporter = nodemailer.createTransport({
       host: this.config.get<string>('MAIL_HOST'),
-      port: this.config.get<number>('MAIL_PORT'),
-      secure: false, // true for 465, false for 587
+      port: Number(this.config.get<string>('MAIL_PORT')),
+      secure: true, // true for 465, false for 587
       auth: {
         user: this.config.get<string>('MAIL_USER'),
         pass: this.config.get<string>('MAIL_PASS'),
       },
+      logger: true,
+      debug: true,
     });
 
     this.logger.log('Mail transporter initialized');
