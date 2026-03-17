@@ -6,6 +6,7 @@ import {
   Post,
   Req,
   Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
@@ -21,7 +22,7 @@ const COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict' as const,
   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-  path: '/api/auth',
+  path: '/',
 };
 
 @ApiTags('Auth')
@@ -58,7 +59,7 @@ export class AuthController {
     const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
 
     if (!refreshToken) {
-      throw new Error('No refresh token provided');
+      throw new UnauthorizedException('No refresh token provided');
     }
 
     const tokens = await this.authService.refresh(refreshToken);
@@ -78,7 +79,7 @@ export class AuthController {
       await this.authService.logout(refreshToken);
     }
 
-    res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/auth' });
+    res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/' });
 
     return { message: 'Logged out successfully' };
   }
@@ -93,7 +94,7 @@ export class AuthController {
   ) {
     await this.authService.logoutAll(user.userId);
 
-    res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/auth' });
+    res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/' });
 
     return { message: 'Logged out from all devices' };
   }
