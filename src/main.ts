@@ -37,7 +37,12 @@ async function bootstrap() {
 
   // CORS — allow your admin frontend
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || 'https://portfolio-admin-panel-beta.vercel.app',
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://portfolio-admin-panel-beta.vercel.app',
+      'https://your-production-domain.com',
+    ],
     credentials: true,
   });
 
