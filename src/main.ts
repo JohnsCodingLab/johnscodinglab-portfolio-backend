@@ -43,6 +43,7 @@ async function bootstrap() {
       'https://portfolio-admin-panel-beta.vercel.app',
       'https://your-production-domain.com',
       'https://johnscodinglab-portfolio.pxxl.click',
+      'https://johnscodinglab-portfolio.vercel.app',
     ],
     credentials: true,
   });
