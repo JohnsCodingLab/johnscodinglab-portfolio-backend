@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { Logger } from 'nestjs-pino';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -18,7 +20,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Cookie parser — reads httpOnly cookies
-  // app.use(cookieParser());
+  app.use(cookieParser());
 
   // Validation — auto-validates DTOs
   app.useGlobalPipes(
