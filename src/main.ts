@@ -37,16 +37,14 @@ async function bootstrap() {
   // Global response interceptor — wraps in { success: true, data: ... }
   app.useGlobalInterceptors(new ResponseInterceptor());
 
-  // CORS — allow your admin frontend
+  // CORS — allow your admin frontend (configure via CORS_ORIGIN env var)
+  const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:3000')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://portfolio-admin-panel-beta.vercel.app',
-      'https://your-production-domain.com',
-      'https://johnscodinglab-portfolio.pxxl.click',
-      'https://johnscodinglab-portfolio.vercel.app',
-    ],
+    origin: corsOrigins,
     credentials: true,
   });
 
