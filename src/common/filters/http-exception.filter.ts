@@ -3,12 +3,15 @@ import {
   Catch,
   ArgumentsHost,
   HttpException,
+  Logger
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AppError, serializeError } from '@johnscodinglab/enterprise-core';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+    private readonly logger = new Logger(GlobalExceptionFilter.name);
+    
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -39,6 +42,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         },
       });
     }
+
+     this.logger.error(
+      exception instanceof Error ? exception.message : 'Unknown error',
+      exception instanceof Error ? exception.stack : undefined,
+    );
 
     // Unknown errors — don't leak internal details
     return response.status(500).json({
