@@ -65,4 +65,8 @@ async function bootstrap() {
     `📚 Swagger docs at http://localhost:${process.env.PORT ?? 3000}/api/docs`,
   );
 }
+bootstrap().catch((err) => {
+  console.error('FATAL bootstrap error:', err);
+  process.exit(1);
+});
 bootstrap();
