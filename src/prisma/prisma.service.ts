@@ -11,34 +11,41 @@ export class PrismaService
   private readonly logger = new Logger(PrismaService.name);
 
   constructor() {
-    const isProd = process.env.NODE_ENV === 'production';
-    const adapter = new PrismaPg({
-      connectionString: process.env.DATABASE_URL,
-      // Always use SSL unless explicitly told not to — Supabase requires it
-      // regardless of NODE_ENV.
-      ssl: process.env.DB_DISABLE_SSL === 'true'
-        ? false
-        : { rejectUnauthorized: false },
-    });
-    super({ adapter });
-
     if (!process.env.DATABASE_URL) {
-      // This will throw later anyway, but fail loudly and early.
+      console.error('FATAL: DATABASE_URL is not set');
       throw new Error('DATABASE_URL is not set');
     }
 
-    this.logger.log(
-      `Prisma initialized (env=${process.env.NODE_ENV ?? 'undefined'}, ssl=${
-        process.env.DB_DISABLE_SSL === 'true' ? 'disabled' : 'enabled'
-      })`,
+    const sslDisabled = process.env.DB_DISABLE_SSL === 'true';
+    const adapter = new PrismaPg({
+      connectionString: process.env.DATABASE_URL,
+      ssl: sslDisabled ? false : { rejectUnauthorized: false },
+    });
+    super({ adapter });
+
+    console.log(
+      `[PrismaService] constructed (ssl=${sslDisabled ? 'disabled' : 'enabled'})`,
     );
   }
 
   async onModuleInit() {
+    console.log('[PrismaService] attempting $connect()...');
+    const CONNECT_TIMEOUT_MS = 10000;
+
     try {
-      await this.$connect();
+      await Promise.race([
+        this.$connect(),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`DB connect timed out after ${CONNECT_TIMEOUT_MS}ms`)),
+            CONNECT_TIMEOUT_MS,
+          ),
+        ),
+      ]);
+      console.log('[PrismaService] connected successfully');
       this.logger.log('Database connection established');
     } catch (error) {
+      console.error('[PrismaService] CONNECTION FAILED:', error);
       this.logger.error(
         'Failed to connect to database',
         error instanceof Error ? error.stack : String(error),
@@ -49,6 +56,6 @@ export class PrismaService
 
   async onModuleDestroy() {
     await this.$disconnect();
-    this.logger.log('Database connection closed');
+    console.log('[PrismaService] disconnected');
   }
 }
