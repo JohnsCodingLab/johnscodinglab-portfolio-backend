@@ -69,4 +69,3 @@ bootstrap().catch((err) => {
   console.error('FATAL bootstrap error:', err);
   process.exit(1);
 });
-bootstrap();
