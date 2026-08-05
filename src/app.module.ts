@@ -27,15 +27,37 @@ import { APP_GUARD } from '@nestjs/core';
       },
     ]),
     LoggerModule.forRoot({
-      pinoHttp: {
-        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
-        transport:
-          process.env.NODE_ENV !== 'production'
-            ? { target: 'pino-pretty', options: { colorize: true } }
-            : undefined,
-        autoLogging: false,
+  pinoHttp: {
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+    transport:
+      process.env.NODE_ENV !== 'production'
+        ? { target: 'pino-pretty', options: { colorize: true } }
+        : undefined,
+
+    // Enable automatic request/response logging
+    autoLogging: true,
+
+    // Redact sensitive headers from logs
+    redact: ['req.headers.authorization', 'req.headers.cookie'],
+
+    // Customize the serializers for cleaner logs
+    serializers: {
+      req(req) {
+        return {
+          method: req.method,
+          url: req.url,
+          remoteAddress: req.remoteAddress,
+        };
       },
-    }),
+      res(res) {
+        return {
+          statusCode: res.statusCode,
+        };
+      },
+    },
+  },
+}),
+
     PrismaModule,
     AuthModule,
     MailModule,

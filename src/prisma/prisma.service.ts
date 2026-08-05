@@ -12,50 +12,55 @@ export class PrismaService
 
   constructor() {
     if (!process.env.DATABASE_URL) {
-      console.error('FATAL: DATABASE_URL is not set');
-      throw new Error('DATABASE_URL is not set');
+      throw new Error('FATAL: DATABASE_URL environment variable is not set');
     }
 
     const sslDisabled = process.env.DB_DISABLE_SSL === 'true';
+    const connectionUrl = new URL(process.env.DATABASE_URL);
+
+    // Log connection target (without credentials)
+    const safeHost = `${connectionUrl.hostname}:${connectionUrl.port || 5432}/${connectionUrl.pathname.slice(1)}`;
+
     const adapter = new PrismaPg({
       connectionString: process.env.DATABASE_URL,
       ssl: sslDisabled ? false : { rejectUnauthorized: false },
     });
     super({ adapter });
 
+    // Use console.log here since the NestJS logger may not be ready yet in constructor
     console.log(
-      `[PrismaService] constructed (ssl=${sslDisabled ? 'disabled' : 'enabled'})`,
+      `[PrismaService] Configured adapter → ${safeHost} (ssl=${sslDisabled ? 'disabled' : 'enabled'})`,
     );
   }
 
   async onModuleInit() {
-    console.log('[PrismaService] attempting $connect()...');
-    const CONNECT_TIMEOUT_MS = 10000;
+    this.logger.log('Attempting database connection...');
+    const CONNECT_TIMEOUT_MS = 10_000;
 
     try {
       await Promise.race([
         this.$connect(),
         new Promise((_, reject) =>
           setTimeout(
-            () => reject(new Error(`DB connect timed out after ${CONNECT_TIMEOUT_MS}ms`)),
+            () => reject(new Error(`Database connection timed out after ${CONNECT_TIMEOUT_MS}ms`)),
             CONNECT_TIMEOUT_MS,
           ),
         ),
       ]);
-      console.log('[PrismaService] connected successfully');
-      this.logger.log('Database connection established');
+      this.logger.log('✅ Database connection established successfully');
     } catch (error) {
-      console.error('[PrismaService] CONNECTION FAILED:', error);
       this.logger.error(
-        'Failed to connect to database',
+        '❌ Database connection FAILED',
         error instanceof Error ? error.stack : String(error),
       );
+      // Re-throw so NestJS knows the module failed to initialize
       throw error;
     }
   }
 
   async onModuleDestroy() {
+    this.logger.log('Disconnecting from database...');
     await this.$disconnect();
-    console.log('[PrismaService] disconnected');
+    this.logger.log('Database disconnected');
   }
 }
